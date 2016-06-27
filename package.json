@@ -1,0 +1,14 @@
+{
+  "name": "pg-easy",
+  "version": "1.0.0",
+  "description": "Simple promise-based interface for node pg",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andreas Hultgren",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^6.0.1"
+  }
+}
