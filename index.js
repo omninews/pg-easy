@@ -1,14 +1,14 @@
 'use strict';
 
-import pg from 'pg';
+const pg = require('pg');
 
-export default class DB {
-  static create (...args) {
-    return new DB(...args);
+class DB {
+  static create (arg1, arg2, arg3) {
+    return new DB(arg1, arg2, arg3);
   }
 
-  constructor ({conStr}, queries) {
-    this.conStr_ = conStr;
+  constructor (args, queries) {
+    this.conStr_ = args.conStr;
 
     Object.keys(queries).forEach((name) => {
       if(this[name]) {
@@ -20,10 +20,16 @@ export default class DB {
   }
 
   preparedQuery_ (query) {
-    return (...args) => this.query(query, args);
+    return (args, theresMore) => {
+      if(theresMore) {
+        // Support both using .query(arg1, arg2) and .query([arg1, arg2]) for node < 4 compatibility
+        args = Array.prototype.slice.call(arguments);
+      }
+      this.query(query, args);
+    }
   }
 
-  query (query, args = []) {
+  query (query, args) {
     return new Promise((resolve, reject) => {
       pg.connect(this.conStr_, (err, client, done) => {
         if (err) {
@@ -31,7 +37,7 @@ export default class DB {
           return reject(err);
         }
 
-        client.query(query, args, (err2, result) => {
+        client.query(query, args || [], (err2, result) => {
           done();
 
           if (err2) {
@@ -44,3 +50,5 @@ export default class DB {
     });
   }
 }
+
+module.exports = DB;
