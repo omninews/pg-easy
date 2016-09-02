@@ -25,7 +25,7 @@ class DB {
         // Support both using .query(arg1, arg2) and .query([arg1, arg2]) for node < 4 compatibility
         args = Array.prototype.slice.call(arguments);
       }
-      this.query(query, args);
+      return this.query(query, args);
     }
   }
 
