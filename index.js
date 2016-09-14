@@ -7,7 +7,7 @@ class DB {
     return new DB(arg1, arg2, arg3);
   }
 
-  constructor (args, queries) {
+  constructor (args, queries, useSpread) {
     this.conStr_ = args.conStr;
 
     Object.keys(queries).forEach((name) => {
@@ -15,18 +15,25 @@ class DB {
         throw new Error(`Query name collision! The name ${name} is not available.`);
       }
       var query = queries[name];
-      this[name] = this.preparedQuery_(query);
+
+      if(useSpread) {
+        this[name] = this.preparedQuerySpread_(query);
+      } else {
+        this[name] = this.preparedQuery_(query);
+      }
     });
   }
 
   preparedQuery_ (query) {
-    return (args, theresMore) => {
-      if(theresMore) {
-        // Support both using .query(arg1, arg2) and .query([arg1, arg2]) for node < 4 compatibility
-        args = Array.prototype.slice.call(arguments);
-      }
-      return this.query(query, args);
-    }
+    return (args) => this.query(query, args);
+  }
+
+  preparedQuerySpread_ (query) {
+    const self = this;
+    return function () {
+      const args = Array.prototype.slice.call(arguments);
+      return self.query(query, args);
+    };
   }
 
   query (query, args) {
@@ -41,10 +48,10 @@ class DB {
           done();
 
           if (err2) {
-            return reject(err2);
+            reject(err2);
+          } else {
+            resolve(result);
           }
-
-          resolve(result);
         });
       });
     });
